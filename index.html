@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Editor de Código Interactivo con CodeMirror</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.css">
+<style>
+  body {
+    display: flex;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+  }
+
+  #editor-container,
+  #preview-container {
+    flex: 1;
+    padding: 0;
+    box-sizing: border-box;
+    height: 100vh;
+  }
+
+  #editor-container {
+    border-right: 1px solid #ccc;
+    overflow: hidden;
+  }
+
+  #editor-header,
+  #preview-header {
+    font-size: 18px;
+    margin-bottom: 10px;
+    padding: 20px;
+  }
+
+  #editor {
+    width: 100%;
+    height: calc(100vh - 120px);
+    border: none;
+  }
+
+  #preview {
+    width: 100%;
+    height: calc(100vh - 120px);
+    border: none;
+  }
+
+  .CodeMirror {
+    height: calc(100vh - 140px);
+  }
+
+  .divider {
+    width: 5px;
+    background-color: #ccc;
+    cursor: col-resize;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 1;
+  }
+
+  .dark-mode {
+    background-color: #333 !important;
+    color: white !important;
+  }
+
+  .dark-mode .CodeMirror {
+    background-color: #1E1E1E !important;
+    color: white !important;
+  }
+
+  .dark-mode #preview-container {
+    background-color: #1E1E1E !important;
+    color: white !important;
+  }
+
+  .dark-mode #preview {
+    border: none !important;
+  }
+
+  .dark-mode .CodeMirror-cursor {
+    border-color: white !important;
+  }
+
+
+
+
+
+
+
+  .sidenav {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: #111;
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 60px;
+}
+
+.sidenav a {
+  padding: 8px 8px 8px 32px;
+  text-decoration: none;
+  font-size: 10px;
+  color: #818181;
+  display: block;
+  transition: 0.3s;
+}
+
+.sidenav a:hover {
+  color: #f1f1f1;
+}
+
+.sidenav .closebtn {
+  position: absolute;
+  top: 0;
+  right: 25px;
+  font-size: 36px;
+  margin-left: 50px;
+}
+
+#main {
+  transition: margin-left .5s;
+  padding: 16px;
+}
+
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</style>
+</head>
+<body>
+
+
+
+  <div id="mySidenav" class="sidenav">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+
+    <a href="#">HTML</a>
+    <button id="paragraph-button" class="button"><i class="icon">📄</i> Paragraph</button>
+    <button id="div-button" class="button"><i class="icon">📦</i> Div</button>
+    <button id="span-button" class="button"><i class="icon">📌</i> Span</button>
+    <button id="break-button" class="button"><i class="icon">↩️</i> Break</button>
+    <button id="line-button" class="button"><i class="icon">➖</i> Line</button>
+    <button id="link-button" class="button"><i class="icon">🔗</i> Link</button>
+    <button id="image-button" class="button"><i class="icon">🖼️</i> Image</button>
+    <button id="line-heading1" class="button"><i class="icon">1️⃣</i> Heading 1</button>
+    <button id="line-heading2" class="button"><i class="icon">2️⃣</i> Heading 2</button>
+    <button id="line-heading3" class="button"><i class="icon">3️⃣</i> Heading 3</button>
+    <button id="line-heading4" class="button"><i class="icon">4️⃣</i> Heading 4</button>
+    <button id="line-heading5" class="button"><i class="icon">5️⃣</i> Heading 5</button>
+    <button id="line-heading6" class="button"><i class="icon">6️⃣</i> Heading 6</button>
+
+    <button id="line-listbulleted" class="button"><i class="icon">🗒️</i> List Bulleted</button>
+    <button id="line-listnumbered" class="button"><i class="icon">📝</i> List Numbered</button>
+    <button id="line-quaote" class="button"><i class="icon">💬</i> Quote</button>
+    <button id="line-bold" class="button"><i class="icon">🔳</i> Bold</button>
+    <button id="line-italic" class="button"><i class="icon">📝</i> Italic</button>
+    <button id="line-Underline" class="button"><i class="icon">✍️</i> Underline</button>
+    <button id="line-stroke" class="button"><i class="icon">❌</i> Stroke</button>
+    <button id="line-subscript" class="button"><i class="icon">⬇️</i> Subscript</button>
+    <button id="line-superscript" class="button"><i class="icon">⬆️</i> Superscript</button>
+    <button id="line-icon" class="button"><i class="icon">🌟</i> Icon</button>
+    <button id="line-table" class="button"><i class="icon">📊</i> Table</button>
+    <button id="line-grid" class="button"><i class="icon">📏</i> Grid</button>
+    <a href="#">CSS</a>
+    <a href="#">JAVASCRIPT</a>
+    <a href="#">PHP</a>
+
+
+  </div>
+  
+
+
+
+  <div id="main">
+
+
+
+  <div id="editor-container">
+    <div id="editor-header">
+      <div id="editor-title">Escribe tu código aquí</div>
+      <span style="font-size:30px;cursor:pointer" onclick="openNav()">&#9776;</span>
+      <button id="toggle-line-numbers-button" class="button"><i class="icon">🔢</i> Mostrar/ocultar Líneas</button>
+      <button id="run-button" class="button"><i class="icon">▶️</i> Ejecutar</button>
+      <button id="clear-button" class="button"><i class="icon">🗑️</i> Limpiar Código</button>
+      <button id="download-button" class="button"><i class="icon">⬇️</i> Descargar Código</button>
+      <button id="copy-button" class="button"><i class="icon">📋</i> Copiar</button>
+      <button id="dark-mode-button" class="button"><i class="icon">🌙</i> Modo Oscuro</button>
+<button id="Entrar" class="button" name="button">Pantalla Completa</button>
+<button id="Salir" class="button" name="button">Salir Pantalla Completa</button>
+<button id="paragraph-button" class="button"><i class="icon">¶</i> Paragraph</button>
+
+
+
+    </div>
+    <div id="editor">
+      <textarea placeholder="Escribe tu código HTML escapado aquí ..."></textarea>
+      <div class="divider"></div>
+    </div>
+  </div>
+</div>
+
+  <div id="preview-container">
+    <div id="preview-header">Área de Visualización</div>
+    <iframe id="preview"></iframe>
+  </div>
+
+
+
+
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.62.0/mode/htmlmixed/htmlmixed.min.js"></script>
+  <script>
+    const editor = CodeMirror.fromTextArea(document.getElementById('editor').getElementsByTagName('textarea')[0], {
+      mode: 'htmlmixed',
+      lineNumbers: true,
+      theme: 'default',
+      lineWrapping: true,
+      viewportMargin: Infinity,
+      scrollbarStyle: null,
+    });
+
+    const runButton = document.getElementById('run-button');
+    const copyButton = document.getElementById('copy-button');
+    const preview = document.getElementById('preview');
+    const iframe = preview.contentWindow.document;
+
+    const clearButton = document.getElementById('clear-button');
+    const downloadButton = document.getElementById('download-button');
+    const darkModeButton = document.getElementById('dark-mode-button');
+
+    const divider = document.querySelector('.divider');
+    const editorContainer = document.getElementById('editor-container');
+    const previewContainer = document.getElementById('preview-container');
+
+    let resizing = false;
+
+    function updatePreview() {
+      const code = editor.getValue();
+      iframe.open();
+      iframe.write(code);
+      iframe.close();
+    }
+
+    editor.on('change', updatePreview);
+
+    runButton.addEventListener('click', updatePreview);
+
+    copyButton.addEventListener('click', () => {
+      editor.execCommand('selectAll');
+      document.execCommand('copy');
+    });
+
+    clearButton.addEventListener('click', () => {
+      editor.setValue('');
+      updatePreview();
+    });
+
+    downloadButton.addEventListener('click', () => {
+      const code = editor.getValue();
+      const blob = new Blob([code], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'codigo.html';
+      a.click();
+    });
+
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark-mode');
+      editor.setOption('theme', document.body.classList.contains('dark-mode') ? 'material-darker' : 'default');
+      iframe.body.style.backgroundColor = document.body.classList.contains('dark-mode') ? '#1E1E1E' : 'white';
+      iframe.body.style.color = document.body.classList.contains('dark-mode') ? 'white' : 'black';
+    }
+
+    darkModeButton.addEventListener('click', toggleDarkMode);
+
+    updatePreview();
+
+    divider.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      resizing = true;
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (!resizing) return;
+      const x = e.pageX;
+      const editorWidth = x - editorContainer.getBoundingClientRect().left;
+      editorContainer.style.width = editorWidth + 'px';
+      previewContainer.style.width = `calc(100% - ${editorWidth}px)`;
+      editor.refresh();
+    });
+
+    document.addEventListener('mouseup', () => {
+      resizing = false;
+    });
+
+    window.addEventListener('resize', () => {
+      const windowWidth = window.innerWidth;
+      if (windowWidth < 768) {
+        editorContainer.style.width = '100%';
+        previewContainer.style.width = '100%';
+      }
+    });
+
+    window.dispatchEvent(new Event('resize'));
+
+
+/* PANTALLA COMPLETA */
+
+
+function getFullscreen(element){
+  if(element.requestFullscreen) {
+      element.requestFullscreen();
+    } else if(element.mozRequestFullScreen) {
+      element.mozRequestFullScreen();
+    } else if(element.webkitRequestFullscreen) {
+      element.webkitRequestFullscreen();
+    } else if(element.msRequestFullscreen) {
+      element.msRequestFullscreen();
+    }
+}
+
+function exitFullscreen() {
+  if(document.exitFullscreen) {
+    document.exitFullscreen();
+  } else if(document.mozCancelFullScreen) {
+    document.mozCancelFullScreen();
+  } else if(document.webkitExitFullscreen) {
+    document.webkitExitFullscreen();
+  }
+}
+
+document.getElementById("Entrar").addEventListener("click", function(e){
+  getFullscreen(document.documentElement);
+},false);
+
+document.getElementById("Salir").addEventListener("click", function(e){
+  exitFullscreen();
+},false);
+
+
+
+/* sidebar */
+
+
+function openNav() {
+  document.getElementById("mySidenav").style.width = "250px";
+  document.getElementById("main").style.marginLeft = "250px";
+}
+
+function closeNav() {
+  document.getElementById("mySidenav").style.width = "0";
+  document.getElementById("main").style.marginLeft= "0";
+}
+
+
+/* botones html */
+
+const paragraphButton = document.getElementById('paragraph-button');
+
+paragraphButton.addEventListener('click', () => {
+  const paragraphText = '<p></p>';
+  editor.replaceSelection(paragraphText);
+  updatePreview();
+});
+
+
+const divButton = document.getElementById('div-button');
+
+divButton.addEventListener('click', () => {
+  const divText = '<div></div>';
+  editor.replaceSelection(divText);
+  updatePreview();
+});
+
+
+
+const spanButton = document.getElementById('span-button');
+
+spanButton.addEventListener('click', () => {
+  const spanText = '<span></span>';
+  editor.replaceSelection(spanText);
+  updatePreview();
+});
+
+
+const breakButton = document.getElementById('break-button');
+
+breakButton.addEventListener('click', () => {
+  const breakText = '<br/>';
+  editor.replaceSelection(breakText);
+  updatePreview();
+});
+
+const lineButton = document.getElementById('line-button');
+
+lineButton.addEventListener('click', () => {
+  const lineText = '<hr/>';
+  editor.replaceSelection(lineText);
+  updatePreview();
+});
+
+
+const linkButton = document.getElementById('link-button');
+
+linkButton.addEventListener('click', () => {
+  const linkText = '<a href=""></a>';
+  editor.replaceSelection(linkText);
+  updatePreview();
+});
+
+
+
+
+
+
+const imageButton = document.getElementById('image-button');
+
+imageButton.addEventListener('click', () => {
+  const imageText = '<img src="" alt="" />';
+  editor.replaceSelection(imageText);
+  updatePreview();
+});
+
+
+
+
+const heading1Button = document.getElementById('line-heading1');
+
+heading1Button.addEventListener('click', () => {
+  const heading1Text = '<h1></h1>';
+  editor.replaceSelection(heading1Text);
+  updatePreview();
+});
+
+const heading2Button = document.getElementById('line-heading2');
+
+heading2Button.addEventListener('click', () => {
+  const heading2Text = '<h2></h2>';
+  editor.replaceSelection(heading2Text);
+  updatePreview();
+});
+
+const heading3Button = document.getElementById('line-heading3');
+
+heading3Button.addEventListener('click', () => {
+  const heading3Text = '<h3></h3>';
+  editor.replaceSelection(heading3Text);
+  updatePreview();
+});
+
+const heading4Button = document.getElementById('line-heading4');
+
+heading4Button.addEventListener('click', () => {
+  const heading4Text = '<h4></h4>';
+  editor.replaceSelection(heading4Text);
+  updatePreview();
+});
+
+const heading5Button = document.getElementById('line-heading5');
+
+heading5Button.addEventListener('click', () => {
+  const heading5Text = '<h5></h5>';
+  editor.replaceSelection(heading5Text);
+  updatePreview();
+});
+
+
+const heading6Button = document.getElementById('line-heading6');
+
+heading6Button.addEventListener('click', () => {
+  const heading6Text = '<h6></h6>';
+  editor.replaceSelection(heading6Text);
+  updatePreview();
+});
+
+
+const listbulletedButton = document.getElementById('line-listbulleted');
+
+listbulletedButton.addEventListener('click', () => {
+  const listbulletedText = '<ul><li></li></ul>';
+  editor.replaceSelection(listbulletedText);
+  updatePreview();
+});
+
+
+const listnumberedButton = document.getElementById('line-listnumbered');
+
+listnumberedButton.addEventListener('click', () => {
+  const listnumberedText = '<ol><li></li></ol>';
+  editor.replaceSelection(listnumberedText);
+  updatePreview();
+});
+
+
+const quaoteButton = document.getElementById('line-quaote');
+
+quaoteButton.addEventListener('click', () => {
+  const quaoteText = '<blockquote></blockquote>';
+  editor.replaceSelection(quaoteText);
+  updatePreview();
+});
+
+
+const boldButton = document.getElementById('line-bold');
+
+boldButton.addEventListener('click', () => {
+  const boldText = '<b></b>';
+  editor.replaceSelection(boldText);
+  updatePreview();
+});
+
+
+const italicButton = document.getElementById('line-italic');
+
+italicButton.addEventListener('click', () => {
+  const italicText = '<i></i>';
+  editor.replaceSelection(italicText);
+  updatePreview();
+});
+
+
+
+
+
+
+const UnderlineButton = document.getElementById('line-Underline');
+
+UnderlineButton.addEventListener('click', () => {
+  const UnderlineText = '<u></u>';
+  editor.replaceSelection(UnderlineText);
+  updatePreview();
+});
+
+
+const strokButton = document.getElementById('line-stroke');
+
+strokButton.addEventListener('click', () => {
+  const strokText = '<s></s>';
+  editor.replaceSelection(strokText);
+  updatePreview();
+});
+
+
+const subscriptButton = document.getElementById('line-subscript');
+
+subscriptButton.addEventListener('click', () => {
+  const subscriptText = '<sub></sub>';
+  editor.replaceSelection(subscriptText);
+  updatePreview();
+});
+
+
+
+const superscriptButton = document.getElementById('line-superscript');
+
+superscriptButton.addEventListener('click', () => {
+  const superscriptText = '<sup></sup>';
+  editor.replaceSelection(superscriptText);
+  updatePreview();
+});
+
+
+const iconButton = document.getElementById('line-icon');
+
+iconButton.addEventListener('click', () => {
+  const iconText = '<i uk-icon="icon:;ratio:"></i>&nbsp;';
+  editor.replaceSelection(iconText);
+  updatePreview();
+});
+
+
+
+
+
+
+const tableButton = document.getElementById('line-table');
+
+tableButton.addEventListener('click', () => {
+  const tableText = '<table class=""><thead><tr><th>1</th><th>2</th><th>3</th></tr></thead><tbody><tr><td>1</td><td>2</td><td>3</td></tr><tr><td>1</td><td>2</td><td>3</td></tr></tbody></table>';
+  editor.replaceSelection(tableText);
+  updatePreview();
+});
+
+
+
+
+
+
+const gridButton = document.getElementById('line-grid');
+
+gridButton.addEventListener('click', () => {
+  const gridText = '<div class=""><div>1</div><div>2</div></div>';
+  editor.replaceSelection(gridText);
+  updatePreview();
+});
+
+
+
+  // funcionalidad ocultar regla
+
+  const toggleLineNumbersButton = document.getElementById('toggle-line-numbers-button');
+
+function toggleLineNumbers() {
+  const showLineNumbers = editor.getOption('lineNumbers');
+  editor.setOption('lineNumbers', !showLineNumbers);
+}
+
+toggleLineNumbersButton.addEventListener('click', toggleLineNumbers);
+
+
+
+  </script>
+</body>
+</html>
